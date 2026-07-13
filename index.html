@@ -88,9 +88,9 @@ img{max-width:100%; display:block;}
 .nav-links a::after{content:''; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--lime); transition:width .25s ease;}
 .nav-links a:hover::after{width:100%;}
 .nav-links a:hover{color:#fff;}
-.nav-actions{display:flex; gap:12px; align-items:center;}
-.nav-actions .btn{padding:11px 20px; font-size:13.5px;}
-.burger{display:none; flex-direction:column; gap:5px;}
+.nav-actions{display:flex; gap:12px; align-items:center; flex-wrap:nowrap; flex-shrink:0;}
+.nav-actions .btn{padding:11px 20px; font-size:13.5px; white-space:nowrap; flex-shrink:0;}
+.burger{display:none; flex-direction:column; gap:5px; flex-shrink:0;}
 .burger span{width:24px; height:2px; background:#fff; border-radius:2px;}
 
 /* ---------- HERO ---------- */
@@ -365,6 +365,12 @@ footer a:hover{color:var(--teal-light);}
 .rk-stat b{display:block; font-size:32px; font-weight:800; color:var(--teal-text); font-family:'Manrope',sans-serif;}
 .rk-stat span{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;}
 .rk-note{font-size:12.5px; color:var(--muted); margin-top:20px; text-align:center; line-height:1.5;}
+.rk-table{width:100%; border-collapse:collapse; font-size:12.5px;}
+.rk-table th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:6px 8px; border-bottom:1px solid rgba(0,0,0,.08);}
+.rk-table td{padding:7px 8px; border-bottom:1px solid rgba(0,0,0,.06);}
+.rk-table tr.rk-me{background:rgba(29,201,158,.1);}
+.rk-table .rk-prog{height:5px;border-radius:100px;background:rgba(0,0,0,.08);margin-top:4px;overflow:hidden;}
+.rk-table .rk-prog-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--teal),var(--lime,#84d43c));}
 
 @media(max-width:900px){
   .hero-grid{grid-template-columns:1fr;}
@@ -376,6 +382,16 @@ footer a:hover{color:var(--teal-light);}
   .nav-links{display:none;}
   .burger{display:flex;}
   .footer-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  .nav-inner{gap:10px;}
+  .brand{font-size:0; gap:0;}
+  .brand img{width:32px; height:32px;}
+  .nav-actions{gap:6px;}
+  .nav-actions .btn{padding:9px 12px; font-size:11.5px;}
+}
+@media(max-width:400px){
+  .nav-actions .btn{padding:8px 9px; font-size:10.5px;}
 }
 @media(max-width:520px){
   .section{padding:70px 0;}
@@ -619,8 +635,8 @@ footer a:hover{color:var(--teal-light);}
     <div class="dash-head">
       <div>
         <div class="eyebrow" style="color:var(--teal-light);">Reta final olímpica</div>
-        <h2 class="section-title" style="color:#fff;">Sua preparação, semana a semana.</h2>
-        <p class="section-sub">Marque suas tarefas e treine com o simulado cronometrado. Para datas oficiais de prova, confira o <a href="#" id="linkCalendarioAluno" style="color:var(--teal-light); text-decoration:underline;">Calendário</a>.</p>
+        <h2 class="section-title" style="color:#fff;" id="metaOlimpTitulo">Sua preparação, semana a semana.</h2>
+        <p class="section-sub" id="metaOlimpSub">Marque suas tarefas e treine com o simulado cronometrado. Para datas oficiais de prova, confira o <a href="#" id="linkCalendarioAluno" style="color:var(--teal-light); text-decoration:underline;">Calendário</a>.</p>
       </div>
     </div>
 
@@ -636,11 +652,26 @@ footer a:hover{color:var(--teal-light);}
         <div class="dash-value" id="simCount">0</div>
         <div class="dash-sub">Cronometrados nesta reta final</div>
       </div>
-      <div class="dash-card span2" style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="dash-card">
+        <div class="dash-label">⭐ XP total</div>
+        <div class="dash-value" id="xpCount">0</div>
+        <div class="dash-sub" id="rankPosSub">Posição no ranking: —</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-label">🔥 Sequência de dias</div>
+        <div class="dash-value" id="streakCount">0</div>
+        <div class="dash-sub" id="metaHojeSub">Ainda não estudou hoje</div>
+      </div>
+      <div class="dash-card span4" style="display:flex; flex-direction:column; justify-content:center;">
         <div class="aluno-actions" style="margin-top:0;">
           <button class="btn btn-primary" style="flex:1;" id="btnAbrirTimer">⏱ Iniciar simulado cronometrado</button>
-          <button class="btn btn-dark" style="flex:1;" id="btnAbrirRanking">🏆 Meu progresso / ranking</button>
+          <button class="btn btn-dark" style="flex:1;" id="btnAbrirRanking">🏆 Ranking e meu progresso</button>
         </div>
+      </div>
+
+      <div class="dash-card span4">
+        <div class="dash-label">🏅 Conquistas</div>
+        <div id="achGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:12px;margin-top:12px;"></div>
       </div>
 
       <div class="dash-card span4">
@@ -674,6 +705,15 @@ footer a:hover{color:var(--teal-light);}
         <option>Tijuca</option>
       </select>
     </div>
+    <div class="field">
+      <label>Qual olimpíada você está focando agora?</label>
+      <select class="setup-sel" id="inpOlimpiada"><option value="">Selecione...</option></select>
+    </div>
+    <div class="field">
+      <label>Crie um código pessoal (4 dígitos)</label>
+      <input type="text" class="setup-sel" id="inpCodigo" placeholder="Ex: 2026" maxlength="10" inputmode="numeric">
+      <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:6px;line-height:1.5">Use sempre o <b>mesmo nome + unidade + código</b> em qualquer aparelho para manter seu progresso sincronizado automaticamente.</div>
+    </div>
     <button type="button" class="btn btn-primary" style="width:100%;" id="btnSalvarSetup">Salvar e continuar</button>
   </div>
 </div>
@@ -700,7 +740,10 @@ footer a:hover{color:var(--teal-light);}
     <button class="modal-close" id="closeRankingBtn" aria-label="Fechar">✕</button>
     <h3 style="margin-bottom:18px;">🏆 Meu progresso</h3>
     <div class="rk-local" id="rkContent"></div>
-    <p class="rk-note">Ranking entre unidades exige um backend compartilhado (ex: Supabase). Neste protótipo, o progresso é salvo apenas neste navegador.</p>
+    <div style="margin-top:22px;">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;">🏆 Top 50 — todas as unidades</div>
+      <div id="rkTableWrap" style="max-height:340px;overflow:auto;"><div class="rk-note">Carregando ranking...</div></div>
+    </div>
   </div>
 </div>
 
@@ -1198,38 +1241,259 @@ document.getElementById('medalGrid').innerHTML = destaques.map(m=>{
 const publicView = document.getElementById('publicView');
 const alunoView = document.getElementById('alunoView');
 
-function getStudent(){ return { nome: localStorage.getItem('poNome')||'', unidade: localStorage.getItem('poUnidade')||'' }; }
+function getStudent(){
+  return {
+    nome: localStorage.getItem('poNome')||'',
+    unidade: localStorage.getItem('poUnidade')||'',
+    codigo: localStorage.getItem('poCodigo')||'',
+    olimpiada: localStorage.getItem('poOlimpiada')||''
+  };
+}
 
-const weeks = [
-  {title:'Semana 1 — Fundamentos e diagnóstico', tasks:[
-    'Revisar conteúdos básicos da disciplina',
-    'Entender o edital e o formato da prova',
-    'Resolver mini-prova diagnóstica (fáceis e médias)',
-    'Revisar os erros do diagnóstico',
-    'Fazer um simulado leve (10–15 questões)'
-  ]},
-  {title:'Semana 2 — Aprofundamento leve', tasks:[
-    'Estudar teoria de nível intermediário',
-    'Resolver lista temática fácil → médio',
-    'Treinar com tempo cronometrado',
-    'Revisar o ponto fraco da semana',
-    'Fazer o simulado 2 e corrigir com atenção'
-  ]},
-  {title:'Semana 3 — Evolução', tasks:[
-    'Resolver 6–10 questões de nível intermediário',
-    'Praticar com provas anteriores (parte da prova)',
-    'Treinar leitura e interpretação técnica',
-    'Fazer um combo de questões variadas',
-    'Fazer o simulado 3 e analisar a evolução'
-  ]},
-  {title:'Semana 4 — Consolidação', tasks:[
-    'Revisão geral por tema',
-    'Reforçar os 3 pontos mais fracos',
-    'Fazer metade de uma prova sem pausas',
-    'Resolver a lista final de nível médio',
-    'Fazer o simulado final da reta final'
-  ]}
-];
+// ── PLANO SEMANAL GERADO A PARTIR DA OLIMPÍADA ESCOLHIDA ──
+function _olimpDiasRestantes(o){
+  if(!o) return null;
+  const meses = parseMeses(o.datas);
+  if(!meses.length) return null;
+  const hoje = new Date();
+  let melhor = null;
+  [hoje.getFullYear(), hoje.getFullYear()+1].forEach(ano=>{
+    meses.forEach(m=>{
+      const idx = MESES_ORDEM.indexOf(m);
+      if(idx===-1) return;
+      const alvo = new Date(ano, idx, 15);
+      const diff = Math.ceil((alvo-hoje)/86400000);
+      if(diff>=0 && (melhor===null || diff<melhor)) melhor = diff;
+    });
+  });
+  return melhor;
+}
+
+function buildWeeks(olimpSig){
+  const o = olimpiadas.find(x=>x.sig===olimpSig) || null;
+  const area = o ? o.area : 'sua disciplina';
+  const sig = o ? o.sig : 'sua prova';
+  const dias = _olimpDiasRestantes(o);
+  const nSemanas = dias!==null ? Math.min(8, Math.max(2, Math.ceil(dias/7))) : 4;
+  const materialUrl = o ? (o.drive ? o.drive.url : (o.site ? o.site.url : null)) : null;
+  const materialTask = materialUrl
+    ? ('Resolver provas anteriores da '+sig+' (material em: '+materialUrl+')')
+    : ('Buscar e resolver provas anteriores da '+sig+' para treino');
+
+  const templates = [
+    {tag:'Fundamentos e diagnóstico', tasks:[
+      'Revisar conteúdos básicos de '+area,
+      'Entender o edital e o formato da prova da '+sig,
+      'Resolver uma mini-prova diagnóstica (fáceis e médias) de '+sig,
+      'Revisar os erros do diagnóstico',
+      'Fazer um simulado leve (10–15 questões) de '+area
+    ]},
+    {tag:'Aprofundamento', tasks:[
+      'Estudar teoria de nível intermediário em '+area,
+      'Resolver lista temática fácil → médio de '+area,
+      'Treinar com tempo cronometrado',
+      'Revisar o ponto fraco da semana',
+      materialTask
+    ]},
+    {tag:'Evolução', tasks:[
+      'Resolver questões de nível avançado de '+area,
+      'Praticar com provas anteriores da '+sig,
+      'Treinar leitura e interpretação técnica',
+      'Fazer um combo de questões variadas de '+area,
+      'Fazer um simulado e analisar a evolução'
+    ]},
+    {tag:'Consolidação e véspera', tasks:[
+      'Revisão geral por tema de '+area,
+      'Reforçar os pontos mais fracos identificados nas semanas anteriores',
+      'Fazer uma prova completa sem pausas, cronometrada',
+      'Revisar os erros da prova completa',
+      'Confirmar data, horário e local da '+sig+' — descansar bem na véspera!'
+    ]}
+  ];
+
+  const arr = [];
+  for(let i=0;i<nSemanas;i++){
+    const tplIdx = Math.min(templates.length-1, Math.floor(i*templates.length/nSemanas));
+    const tpl = templates[tplIdx];
+    arr.push({ title: 'Semana '+(i+1)+' — '+tpl.tag+(o?(' · '+sig):''), tasks: tpl.tasks });
+  }
+  return arr;
+}
+
+let weeks = buildWeeks(getStudent().olimpiada);
+
+// Popula o select de olimpíadas do modal de cadastro com o catálogo já existente no site
+(function _fillOlimpSelect(){
+  const sel = document.getElementById('inpOlimpiada');
+  if(!sel) return;
+  olimpiadas.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(o=>{
+    const opt = document.createElement('option');
+    opt.value = o.sig;
+    opt.textContent = o.nome+' ('+o.sig+')';
+    sel.appendChild(opt);
+  });
+})();
+
+// ── SINCRONIZAÇÃO ENTRE APARELHOS (Supabase) ──────────────────────
+// 1) Crie um projeto em supabase.com (ou use um já existente).
+// 2) Rode no SQL Editor:
+//    CREATE TABLE ranking_olimpico (
+//      device_key text PRIMARY KEY,   -- nome+unidade+código, não um ID por aparelho
+//      nome text, unidade text, olimpiada text,
+//      tarefas int DEFAULT 0, simulados int DEFAULT 0, xp int DEFAULT 0,
+//      progresso jsonb,               -- snapshot completo do progresso (sincroniza celular/PC)
+//      atualizado timestamptz DEFAULT now()
+//    );
+//    ALTER TABLE ranking_olimpico ENABLE ROW LEVEL SECURITY;
+//    CREATE POLICY "r" ON ranking_olimpico FOR SELECT USING (true);
+//    CREATE POLICY "w" ON ranking_olimpico FOR INSERT WITH CHECK (true);
+//    CREATE POLICY "u" ON ranking_olimpico FOR UPDATE USING (true);
+// 3) Cole a URL e a anon key do projeto abaixo (Project Settings → API).
+const SB_URL = 'https://wiqefncbzekjnenaxiti.supabase.co';
+const SB_KEY = 'sb_publishable_R4OiV_mlAe5QkLb9k_bRTg_LC7NB6Ou';
+function _sbPronto(){ return !!(SB_URL && SB_KEY && SB_KEY.indexOf('COLOQUE_AQUI')!==0); }
+
+function _slug(s){
+  return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
+}
+function _alunoKey(){
+  const s = getStudent();
+  return _slug(s.nome)+'_'+_slug(s.unidade)+'_'+_slug(s.codigo);
+}
+
+// Tudo que conta como progresso do aluno (tarefas, simulados, XP, sequência de
+// dias, olimpíada escolhida) vira um snapshot único, restaurável em qualquer
+// aparelho que faça login com o mesmo nome+unidade+código.
+const _SNAP_BLACKLIST = ['poLastSync'];
+function _buildSnapshot(){
+  const snap = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(!k || _SNAP_BLACKLIST.indexOf(k)!==-1) continue;
+    if(k.indexOf('po')===0) snap[k] = localStorage.getItem(k);
+  }
+  return snap;
+}
+function _applySnapshot(snap){
+  if(!snap) return;
+  Object.keys(snap).forEach(function(k){ try{ localStorage.setItem(k, snap[k]); }catch(e){} });
+}
+
+async function _pullProgress(){
+  if(!_sbPronto()) return false;
+  try{
+    const r = await fetch(SB_URL+'/rest/v1/ranking_olimpico?device_key=eq.'+encodeURIComponent(_alunoKey())+'&select=progresso,atualizado', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
+    const rows = await r.json();
+    if(rows && rows[0] && rows[0].progresso){
+      const cloud = typeof rows[0].progresso==='string' ? JSON.parse(rows[0].progresso) : rows[0].progresso;
+      _applySnapshot(cloud);
+      localStorage.setItem('poLastSync', rows[0].atualizado||new Date().toISOString());
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// Ao reabrir a área do aluno num aparelho já cadastrado, verifica se existe
+// progresso mais recente feito em outro aparelho e, se houver, traz para cá.
+async function _checkCloudUpdate(){
+  if(!_sbPronto()){ syncTudo(); return; }
+  try{
+    const r = await fetch(SB_URL+'/rest/v1/ranking_olimpico?device_key=eq.'+encodeURIComponent(_alunoKey())+'&select=progresso,atualizado', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
+    const rows = await r.json();
+    const cloudTime = rows && rows[0] ? (Date.parse(rows[0].atualizado||0)||0) : 0;
+    const localTime = Date.parse(localStorage.getItem('poLastSync')||0)||0;
+    if(rows && rows[0] && rows[0].progresso && cloudTime>localTime+5000){
+      _applySnapshot(typeof rows[0].progresso==='string' ? JSON.parse(rows[0].progresso) : rows[0].progresso);
+      localStorage.setItem('poLastSync', rows[0].atualizado);
+      location.reload();
+      return;
+    }
+  }catch(e){}
+  syncTudo();
+}
+
+let _syncTimer = null;
+function syncTudo(){
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(_syncNow, 700);
+}
+async function _syncNow(){
+  if(!_sbPronto()) return;
+  const s = getStudent();
+  if(!s.nome) return;
+  const {done} = countTasks();
+  const sims = parseInt(localStorage.getItem('poSimulados'))||0;
+  const agora = new Date().toISOString();
+  const base = {device_key:_alunoKey(), nome:s.nome, unidade:s.unidade, olimpiada:s.olimpiada, tarefas:done, simulados:sims, xp:calcXP(), atualizado:agora};
+  try{
+    const r = await fetch(SB_URL+'/rest/v1/ranking_olimpico', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, Prefer:'resolution=merge-duplicates'},
+      body: JSON.stringify(Object.assign({}, base, {progresso:_buildSnapshot()}))
+    });
+    if(!r.ok) throw new Error('sem coluna progresso?');
+    localStorage.setItem('poLastSync', agora);
+  }catch(e){
+    // Se a coluna "progresso" ainda não existir no Supabase, tenta sem ela
+    // (mantém ao menos o ranking/XP funcionando enquanto ela não é criada).
+    try{
+      await fetch(SB_URL+'/rest/v1/ranking_olimpico', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, Prefer:'resolution=merge-duplicates'},
+        body: JSON.stringify(base)
+      });
+      localStorage.setItem('poLastSync', agora);
+    }catch(e2){}
+  }
+}
+
+// Um mesmo aluno pode ter mais de um registro (ex: trocou de código, ou usou
+// o site em aparelhos diferentes antes de existir sincronização). Isto agrupa
+// por aluno (nome+unidade) e mantém só o registro com mais XP de cada um.
+function _dedupRanking(rows){
+  const seen = {};
+  (rows||[]).forEach(function(r){
+    const k = _slug(r.nome)+'_'+_slug(r.unidade);
+    if(!seen[k] || (r.xp||0)>(seen[k].xp||0)) seen[k]=r;
+  });
+  return Object.values(seen).sort(function(a,b){ return (b.xp||0)-(a.xp||0); });
+}
+
+async function loadRankingReal(){
+  const wrap = document.getElementById('rkTableWrap');
+  if(!wrap) return;
+  if(!_sbPronto()){
+    wrap.innerHTML = '<div class="rk-note">Conecte o Supabase (preencha SB_KEY no código) para ver o ranking entre todas as unidades.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="rk-note">Carregando ranking...</div>';
+  try{
+    const r = await fetch(SB_URL+'/rest/v1/ranking_olimpico?select=*&order=xp.desc&limit=300', {headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY}});
+    const data = _dedupRanking(await r.json()).slice(0,50);
+    if(!data.length){ wrap.innerHTML = '<div class="rk-note">Nenhum participante ainda. Complete tarefas para aparecer aqui!</div>'; return; }
+    const meKey = _slug(getStudent().nome)+'_'+_slug(getStudent().unidade);
+    const medals = ['🥇','🥈','🥉'];
+    const maxXP = Math.max(1, data[0].xp||1);
+    let html = '<table class="rk-table"><thead><tr><th>#</th><th>Nome</th><th>Unidade</th><th>XP</th></tr></thead><tbody>';
+    let myPos = -1;
+    data.forEach(function(row,i){
+      const isMe = (_slug(row.nome)+'_'+_slug(row.unidade))===meKey;
+      if(isMe) myPos = i+1;
+      const xp = row.xp||0;
+      const pct = Math.round(xp/maxXP*100);
+      html += '<tr class="'+(isMe?'rk-me':'')+'"><td>'+(medals[i]||(i+1))+'</td>'+
+        '<td>'+row.nome+(isMe?' <small>(você)</small>':'')+'</td>'+
+        '<td>'+row.unidade+'</td>'+
+        '<td><b>'+xp+'</b><div class="rk-prog"><div class="rk-prog-bar" style="width:'+pct+'%"></div></div></td></tr>';
+    });
+    wrap.innerHTML = html+'</tbody></table>';
+    const rp = document.getElementById('rankPosSub');
+    if(rp) rp.textContent = 'Posição no ranking: '+(myPos===-1 ? '—' : (myPos+'º de '+data.length));
+  }catch(e){
+    wrap.innerHTML = '<div class="rk-note">Erro ao carregar ranking. Verifique a conexão.</div>';
+  }
+}
 
 function taskId(w,i){ return 'po_task_'+w+'_'+i; }
 function countTasks(){
@@ -1264,8 +1528,10 @@ function renderWeeks(){
       const id = row.dataset.id;
       const isDone = localStorage.getItem(id)==='1';
       localStorage.setItem(id, isDone ? '0' : '1');
+      if(!isDone) _markStudyDay();
       renderWeeks();
       renderProgress();
+      syncTudo();
     });
   });
 }
@@ -1277,6 +1543,59 @@ function renderProgress(){
   document.getElementById('progSub').textContent = done+' de '+total+' tarefas concluídas';
   setTimeout(()=>{ document.getElementById('progBar').style.width = pct+'%'; }, 80);
   document.getElementById('simCount').textContent = localStorage.getItem('poSimulados')||'0';
+  document.getElementById('xpCount').textContent = calcXP();
+  document.getElementById('streakCount').textContent = calcStreak();
+  const hojeStr = new Date().toISOString().slice(0,10);
+  const dias = JSON.parse(localStorage.getItem('poStreakDays')||'[]');
+  const metaEl = document.getElementById('metaHojeSub');
+  if(metaEl) metaEl.textContent = dias.includes(hojeStr) ? '✅ Meta de hoje cumprida!' : '⏳ Ainda não estudou hoje';
+  renderAchievements();
+}
+
+// ── XP, SEQUÊNCIA DE DIAS E CONQUISTAS ──
+function calcXP(){
+  const {done} = countTasks();
+  const sims = parseInt(localStorage.getItem('poSimulados'))||0;
+  return done*10 + sims*30;
+}
+function _markStudyDay(){
+  const days = JSON.parse(localStorage.getItem('poStreakDays')||'[]');
+  const today = new Date().toISOString().slice(0,10);
+  if(days.indexOf(today)===-1){ days.push(today); localStorage.setItem('poStreakDays', JSON.stringify(days)); }
+}
+function calcStreak(){
+  const days = JSON.parse(localStorage.getItem('poStreakDays')||'[]').slice().sort();
+  if(!days.length) return 0;
+  const todayStr = new Date().toISOString().slice(0,10);
+  const yestStr = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const last = days[days.length-1];
+  if(last!==todayStr && last!==yestStr) return 0;
+  let streak=1;
+  for(let i=days.length-1;i>0;i--){
+    const diff = Math.round((new Date(days[i])-new Date(days[i-1]))/86400000);
+    if(diff===1) streak++; else if(diff===0) continue; else break;
+  }
+  return streak;
+}
+const ACHIEVEMENTS = [
+  {ico:'🏅', nome:'Primeira tarefa', check:c=>c.done>=1},
+  {ico:'🔥', nome:'7 dias seguidos', check:c=>c.streak>=7},
+  {ico:'📚', nome:'Checklist completo', check:c=>c.total>0 && c.done>=c.total},
+  {ico:'⏱️', nome:'Primeiro simulado', check:c=>c.sims>=1},
+  {ico:'🏆', nome:'5 simulados', check:c=>c.sims>=5},
+];
+function renderAchievements(){
+  const el = document.getElementById('achGrid');
+  if(!el) return;
+  const {done,total} = countTasks();
+  const ctx = {done,total,streak:calcStreak(),sims:parseInt(localStorage.getItem('poSimulados'))||0};
+  el.innerHTML = ACHIEVEMENTS.map(a=>{
+    const unlocked = a.check(ctx);
+    return '<div style="text-align:center;opacity:'+(unlocked?1:.35)+';filter:'+(unlocked?'none':'grayscale(1)')+'">'+
+      '<div style="font-size:22px">'+a.ico+'</div>'+
+      '<div style="font-size:10px;font-weight:700;margin-top:4px;color:rgba(255,255,255,.85)">'+a.nome+'</div>'+
+    '</div>';
+  }).join('');
 }
 
 function renderAlunoHeader(){
@@ -1287,10 +1606,28 @@ function renderAlunoHeader(){
   document.getElementById('alunoAvatar').textContent = initials || 'AA';
 }
 
+function _updateMetaOlimp(){
+  const s = getStudent();
+  const o = olimpiadas.find(x=>x.sig===s.olimpiada);
+  if(!o) return;
+  const dias = _olimpDiasRestantes(o);
+  const titEl = document.getElementById('metaOlimpTitulo');
+  const subEl = document.getElementById('metaOlimpSub');
+  if(titEl) titEl.textContent = 'Sua reta final para a '+o.sig;
+  if(subEl){
+    subEl.innerHTML = (dias!==null ? ('Faltam <b>'+dias+' dias</b> para a próxima edição da '+o.nome+'. ') : ('Foco na '+o.nome+'. '))+
+      'Marque suas tarefas e treine com o simulado cronometrado. Confira o <a href="#" id="linkCalendarioAluno2" style="color:var(--teal-light); text-decoration:underline;">Calendário</a> para datas oficiais.';
+    const link2 = document.getElementById('linkCalendarioAluno2');
+    if(link2) link2.addEventListener('click', (e)=>{ e.preventDefault(); exitAluno(); setTimeout(()=>document.getElementById('calendario').scrollIntoView({behavior:'smooth'}),50); });
+  }
+}
+
 function openAluno(){
   const {nome} = getStudent();
   if(!nome){ openSetup(); return; }
+  weeks = buildWeeks(getStudent().olimpiada);
   showAlunoPanel();
+  _checkCloudUpdate();
 }
 function showAlunoPanel(){
   publicView.style.display = 'none';
@@ -1299,6 +1636,7 @@ function showAlunoPanel(){
   renderAlunoHeader();
   renderWeeks();
   renderProgress();
+  _updateMetaOlimp();
 }
 function exitAluno(){
   alunoView.style.display = 'none';
@@ -1307,20 +1645,29 @@ function exitAluno(){
 
 const moSetup = document.getElementById('moSetup');
 function openSetup(){
-  const {nome,unidade} = getStudent();
+  const {nome,unidade,codigo,olimpiada} = getStudent();
   document.getElementById('inpNome').value = nome;
   document.getElementById('inpUnidade').value = unidade;
+  document.getElementById('inpCodigo').value = codigo;
+  document.getElementById('inpOlimpiada').value = olimpiada;
   moSetup.classList.add('open');
 }
 function closeSetup(){ moSetup.classList.remove('open'); }
-document.getElementById('btnSalvarSetup').addEventListener('click', ()=>{
+document.getElementById('btnSalvarSetup').addEventListener('click', async ()=>{
   const nome = document.getElementById('inpNome').value.trim();
   const unidade = document.getElementById('inpUnidade').value;
-  if(!nome || !unidade){ alert('Preencha nome e unidade para continuar.'); return; }
+  const codigo = document.getElementById('inpCodigo').value.trim();
+  const olimpiada = document.getElementById('inpOlimpiada').value;
+  if(!nome || !unidade || !codigo){ alert('Preencha nome, unidade e código para continuar.'); return; }
   localStorage.setItem('poNome', nome);
   localStorage.setItem('poUnidade', unidade);
+  localStorage.setItem('poCodigo', codigo);
+  localStorage.setItem('poOlimpiada', olimpiada);
   closeSetup();
+  await _pullProgress(); // se já existir progresso salvo na nuvem com este nome+unidade+código, traz para cá
+  weeks = buildWeeks(getStudent().olimpiada || olimpiada);
   showAlunoPanel();
+  syncTudo();
 });
 
 document.getElementById('btnAreaAluno').addEventListener('click', openAluno);
@@ -1371,11 +1718,13 @@ document.getElementById('tBtnDone').addEventListener('click', ()=>{
   clearInterval(tInterval); tRunning=false;
   const n = (parseInt(localStorage.getItem('poSimulados'))||0)+1;
   localStorage.setItem('poSimulados', n);
+  _markStudyDay();
   moTimer.classList.remove('open');
   renderProgress();
+  syncTudo();
 });
 
-/* ================= RANKING / PROGRESSO LOCAL ================= */
+/* ================= RANKING / PROGRESSO ================= */
 const moRanking = document.getElementById('moRanking');
 document.getElementById('btnAbrirRanking').addEventListener('click', ()=>{
   const {nome,unidade} = getStudent();
@@ -1392,6 +1741,7 @@ document.getElementById('btnAbrirRanking').addEventListener('click', ()=>{
       '<div class="rk-stat"><b>'+pct+'%</b><span>Progresso</span></div>'+
     '</div>';
   moRanking.classList.add('open');
+  loadRankingReal();
 });
 document.getElementById('closeRankingBtn').addEventListener('click', ()=> moRanking.classList.remove('open'));
 moRanking.addEventListener('click', e=>{ if(e.target===moRanking) moRanking.classList.remove('open'); });
